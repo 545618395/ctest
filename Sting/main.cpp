@@ -9,25 +9,24 @@ using namespace std;
 class String
 {
 public:
-	String(char* str = NULL); //Ä¬ÈÏ¹¹Ôì
-	String(const String& other);//¿½±´¹¹Ôì
-	String(String&& other);    //ÒÆ¶¯¿½±´
-	String& operator=(const String& other); //ÔËËã·ûÖØÔØ¿½±´¹¹Ôì
-	String& operator=( String&& other);     //ÔËËã·ûÖØÔØÒÆ¶¯¿½±´¹¹Ôì
+	String(char* str = NULL); //é»˜è®¤æ„é€ 
+	String(const String& other);//æ‹·è´æ„é€ 
+	String(String&& other);    //ç§»åŠ¨æ‹·è´
+	String& operator=(const String& other); //è¿ç®—ç¬¦é‡è½½æ‹·è´æ„é€ 
+	String& operator=( String&& other);     //è¿ç®—ç¬¦é‡è½½ç§»åŠ¨æ‹·è´æ„é€ 
 	~String();
 
-	//String ÀàµÄÀ©Õ¹½Ó¿Ú
-	String operator+(const String &str) const;	//ÖØÔØ+
-	String& operator=(const String &str);		//ÖØÔØ=
-	String& operator+=(const String &str);		//ÖØÔØ+=
-	bool operator==(const String &str) const;	//ÖØÔØ==
-	char& operator[](int n) const;				//ÖØÔØ[]
+	//String ç±»çš„æ‰©å±•æ¥å£
+	String operator+(const String &str) const;	//é‡è½½+
+	String& operator+=(const String &str);		//é‡è½½+=
+	bool operator==(const String &str) const;	//é‡è½½==
+	char& operator[](int n) const;				//é‡è½½[]
 
-	size_t size() const;		//»ñÈ¡³¤¶È
-	const char* c_str() const;	//»ñÈ¡C×Ö·û´®
+	size_t size() const;		//è·å–é•¿åº¦
+	const char* c_str() const;	//è·å–Cå­—ç¬¦ä¸²
 
-	friend istream& operator>>(istream &is, String &str);//ÊäÈë
-	friend ostream& operator<<(ostream &os, String &str);//Êä³ö
+	friend istream& operator>>(istream &is, String &str);//è¾“å…¥
+	friend ostream& operator<<(ostream &os, String &str);//è¾“å‡º
 
 private:
 	char* str_ptr_;
@@ -36,7 +35,7 @@ private:
 
 String::String(char* str)
 {
-	//new·½·¨
+	//newæ–¹æ³•
 	//	str_ptr_ = new char[len];
 
 	if (!str)
@@ -45,7 +44,7 @@ String::String(char* str)
 		str_ptr_ = '\0';
 	}else
 	{
-		//malloc ·½·¨
+		//malloc æ–¹æ³•
 		str_ptr_ = (char*)malloc(strlen(str) + 1);
 
 		strcpy(str_ptr_, str);
@@ -102,11 +101,13 @@ String::~String()
 	}
 }
 
-//ÒÔÏÂÊÇStringÀàµÄÀ©Õ¹½Ó¿Ú
+//ä»¥ä¸‹æ˜¯Stringç±»çš„æ‰©å±•æ¥å£
 String String::operator+(const String &other) const
 {
 	String newString;
 	size_t newLen = strlen(str_ptr_) + strlen(other.str_ptr_);
+
+	free(newString.str_ptr_);
 
 	newString.str_ptr_ = (char*)malloc(newLen + 1);
 
@@ -118,12 +119,84 @@ String String::operator+(const String &other) const
 
 }
 
+String& String::operator+=(const String &other)		//é‡è½½+=
+{
+	char* newStr = (char*)malloc(strlen(str_ptr_)+strlen(other.str_ptr_) + 1);
 
+	strcpy(newStr, str_ptr_);
 
+	strcat(newStr, other.str_ptr_);
+
+	free(str_ptr_);
+
+	str_ptr_ = newStr;
+
+	return *this;
+}
+
+bool String::operator==(const String &other) const//é‡è½½==
+{
+	if (strlen(str_ptr_) != strlen(other.str_ptr_))	return false;
+	return strcmp(str_ptr_, other.str_ptr_) ? false : true;
+}
+
+inline char& String::operator[](int n) const//é‡è½½[]
+{
+	size_t length = strlen(str_ptr_);
+	if (n >= length) return str_ptr_[length - 1]; //é”™è¯¯å¤„ç†
+	else return str_ptr_[n];
+}
+
+inline size_t String::size() const//è·å–é•¿åº¦
+{
+	return strlen(str_ptr_);
+}
+
+inline const char* String::c_str() const//è·å–Cå­—ç¬¦ä¸²
+{
+	return str_ptr_;
+}
+
+istream& operator>>(istream &is, String &other)//è¾“å…¥
+{
+	char tem[1000];  //ç®€å•çš„ç”³è¯·ä¸€å—å†…å­˜
+	is >> tem;
+
+	free(other.str_ptr_);
+
+	other.str_ptr_ = (char*)malloc(strlen(tem) + 1);
+
+	strcpy(other.str_ptr_, tem);
+	return is;
+}
+
+ostream& operator<<(ostream &os, String &other)//è¾“å‡º
+{
+	os << other.str_ptr_;
+	return os;
+}
 
 int main()
 {
+	{
+		String s;
+		cin >> s;
+		cout << s << ": " << s.size() << endl;
 
+		char a[] = "Hello", b[] = "World!";
+		String s1(a), s2(b);
+		cout << s1 << " + " << s2 << " = " << s1 + s2 << endl;
+
+		String s3 = s1 + s2;
+		if (s1 == s3)	cout << "First: s1 == s3" << endl;
+		s1 += s2;
+		if (s1 == s3)	cout << "Second: s1 == s3" << endl;
+
+		String s4(std::move(s));//ç§»åŠ¨æ„é€ 
+		
+		String s5;
+		s5 = std::move(s4); //ç§»åŠ¨æ‹·è´æ„é€ 
+	}
 
 	system("pause");
 	return 0;
