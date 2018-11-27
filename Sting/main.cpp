@@ -192,6 +192,8 @@ int main()
 		s1 += s2;
 		if (s1 == s3)	cout << "Second: s1 == s3" << endl;
 
+		String s6(s1);
+
 		String s4(std::move(s));//移动构造
 		
 		String s5;
